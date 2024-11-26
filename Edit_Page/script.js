@@ -50,10 +50,22 @@ tinymce.init({
 
 const formulario = document.getElementById('formulario');
 formulario.addEventListener('submit', (e) => {
+    // Prevenir envio por defecto
     e.preventDefault();
-
     const contenido = tinymce.activeEditor.getContent();
     console.log(contenido);
+    const opciones =document.getElementsByName('intereses');
+    let opcionSeleccionada;
+    for (const opcion of opciones){
+        if(opcion.checked){
+            opcionSeleccionada = opcion.value;
+            break;
+        }
+    }
+
+    console.log('Opcion seleccionada: ', opcionSeleccionada);
+    // Resetear el formulario 
+    document.getElementById('formulario').reset();
 })
 
 const navToggle = document.querySelector(".nav-menu_toggle"),

@@ -879,9 +879,9 @@ p {
 
 .image-placeholder {
     width: 100%;
-    max-width: 1240px;
+    max-width: 340px;
     height: 250px;
-    background-color: #ccc;
+    background-color: #bba9a9;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -941,8 +941,8 @@ textarea {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    align-self: flex-end; 
-    margin-left: 815px;
+    align-self: flex-start; 
+    margin-left: 0px;
 }
 
 .sidebar {
