@@ -1,6 +1,7 @@
 <?php
 require_once '../coneccion.php';
 header('Content-Type: application/json');
+session_start(); // Iniciar sesión al principio
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usuario = trim($_POST['username']);
@@ -8,8 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     error_log("=== INICIO DE SESIÓN ===");
     error_log("Usuario: " . $usuario);
-    error_log("Contraseña ingresada (longitud): " . strlen($contrasena));
-
+    
     $loginQuery = "SELECT * FROM usuarios WHERE usuario = ?";
     $stmt = $conexionace->prepare($loginQuery);
     $stmt->bind_param("s", $usuario);
@@ -19,36 +19,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result->num_rows === 1) {
         $row = $result->fetch_assoc();
         $hashedPassword = $row['contrasena'];
-
-        error_log("Hash en DB: " . $hashedPassword);
         
-        // Intentar la verificación y mostrar resultado
         $isValid = password_verify($contrasena, $hashedPassword);
-        error_log("Resultado de verificación: " . ($isValid ? "exitoso" : "fallido"));
-        error_log("INFO password_verify - Contraseña: " . $contrasena . " | Hash: " . $hashedPassword);
-
+        
         if ($isValid) {
-            session_start();
+            // Guardar datos importantes en la sesión
             $_SESSION['usuario'] = $usuario;
-            echo json_encode([
-                'success' => true,
-                'message' => 'Inicio de sesión exitoso',
-                'user' => ['username' => $usuario]
-            ]);
+            $_SESSION['usuario_id'] = $row['id'];
+            $_SESSION['email'] = $row['email'];
+            $_SESSION['logged_in'] = true;
+            
+            $redirect = $_GET['redirect'] ?? 'home';
+            if ($redirect === 'edit') {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Inicio de sesión exitoso',
+                    'redirect' => '../Edit_Page/index.html'
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => true, 
+                    'message' => 'Inicio de sesión exitoso',
+                    'redirect' => '../Home_Page/index.html'
+                ]);
+            }
         } else {
             echo json_encode([
                 'success' => false, 
-                'message' => 'Contraseña incorrecta',
-                'debug_info' => [
-                    'hash_length' => strlen($hashedPassword),
-                    'password_length' => strlen($contrasena)
-                ]
+                'message' => 'Contraseña incorrecta'
             ]);
         }
     } else {
         echo json_encode(['success' => false, 'message' => 'Usuario no encontrado']);
     }
-    error_log("=== FIN DE SESIÓN ===");
     exit();
 }
 ?>

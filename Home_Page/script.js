@@ -2,6 +2,28 @@ const navToggle = document.querySelector(".nav-menu_toggle"),
       navMenu = document.querySelector(".nav_menu"),
       navClose = document.querySelector(".nav-menu_close");
 
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const response = await fetch('../check-session.php');
+        const data = await response.json();
+        const signInBtn = document.querySelector('.nav-btn');
+        
+        if (data.isLoggedIn) {
+            signInBtn.textContent = `${data.user.username}`;
+            signInBtn.href = '#';
+            
+            signInBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                if (confirm('¿Desea cerrar sesión?')) {
+                    await fetch('../logout.php');
+                    window.location.href = '../Login_Register/index.html?logout=true';
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error checking session:', error);
+    }
+});
 
 if (navToggle) {
     navToggle.addEventListener("click", () => {
@@ -15,113 +37,6 @@ if (navClose) {
     })
 }
 
-// // HEADER RIGHT
-
-// const rightHeader = document.querySelector(".right_header-toggle"),
-//       headerRightMenu = document.querySelector(".header-right"),
-//       rightClose = document.querySelector(".header-right_close");
-
-// if (rightHeader) {
-//     rightHeader.addEventListener("click", () => {
-//         headerRightMenu.classList.add("show-right_menu")
-//     })
-// }
-
-// if (rightClose) {
-//     rightClose.addEventListener("click", () => {
-//         headerRightMenu.classList.remove("show-right_menu")
-//     })
-// }
-
-//     // SLIDER
-
-// var swiper = new Swiper(".breaking_container", {
-//     centeredSlide: true,
-//     cssMode: true,
-//     autoplay: {
-//         delay: 4500,
-//         disableOnInteraction: false,
-//     },
-//     loop: true,
-//     slidesPerView: 1,
-//     breakpoints: {
-//         640: {
-//             slidesPerView: 1,
-//             spaceBetween: 0,
-//         },
-//         768: {
-//             slidesPerView: 2,
-//             spaceBetween: 0,
-//         },
-//         1024: {
-//             slidesPerView: 3,
-//             spaceBetween: 0,
-//         },
-//     }
-// });
-
-    // PAGINATION
-
-// let ul = document.querySelector(".ul");
-// let prev = document.querySelector(".prev");
-// let next = document.querySelector(".next");
-// let current_page = 1;
-// let total_page = 10;
-// let active_page = "";
-
-// create_pages(current_page);
-
-// function create_pages(current_page) {
-//     ul.innerHTML = "";
-
-//     let before_page = current_page - 2;
-//     let after_page = current_page + 2;
-
-//     if(current_page == 2) {
-//         before_page = current_page - 1;
-//     }
-//     if(current_page == 1) {
-//         before_page = current_page;
-//     }
-
-//     if(current_page == total_page - 1) {
-//         after_page = current_page + 1;
-//     }
-//     if(current_page == total_page) {
-//         after_page = current_page;
-//     }
-
-//     for (let i = before_page; i <= after_page; i++) {
-//         if (current_page == i) {
-//             active_page = "active_page";
-//         } else {
-//             active_page = "";
-//         }
-//         ul.innerHTML += '<li onclick="create_pages('+ i +')"><a href="#" class="page_number '+ active_page +'">'+ i +'</a></li>';
-
-//     }
-
-//     prev.onclick = function () {
-//         current_page--;
-//         create_pages(current_page);
-//     }
-//     if(current_page <= 1) {
-//         prev.style.display = "none";
-//     } else {
-//         prev.style.display = "block"
-//     }
-
-//     next.onclick = function () {
-//         current_page++;
-//         create_pages(current_page);
-//     }
-//     if(current_page >= total_page) {
-//         next.style.display = "none";
-//     } else {
-//         next.style.display = "block"
-//     }
-// }
-
 let ul = document.querySelector(".ul");
 let prev = document.querySelector(".prev");
 let next = document.querySelector(".next");
@@ -133,21 +48,17 @@ create_pages(current_page);
 
 function create_pages(current_page) {
     ul.innerHTML = "";
+    let before_page = current_page - 1;
+    let after_page = current_page + 1;   
 
-    // Cambiar el rango para mostrar solo 3 números
-    let before_page = current_page - 1; // Muestra un número antes
-    let after_page = current_page + 1;   // Muestra un número después
-
-    // Ajustar límites cuando estamos cerca de los extremos
     if(current_page == 1) {
-        after_page = Math.min(total_page, current_page + 2); // Muestra dos después si es la primera página
+        after_page = Math.min(total_page, current_page + 2);
     }
     
     if(current_page == total_page) {
-        before_page = Math.max(1, current_page - 2); // Muestra dos antes si es la última página
+        before_page = Math.max(1, current_page - 2);
     }
 
-    // Asegurarse de que el rango no exceda los límites
     for (let i = Math.max(1, before_page); i <= Math.min(total_page, after_page); i++) {
         if (current_page == i) {
             active_page = "active_page";
@@ -176,8 +87,6 @@ function create_pages(current_page) {
     next.style.display = current_page >= total_page ? "none" : "block";
 }
 
-    // BACK TOP
-
 const backTopbtn = document.querySelector(".back-top-btn");
 
 const showElemOnScroll = function() {
@@ -189,9 +98,3 @@ const showElemOnScroll = function() {
 }
 
 window.addEventListener("scroll", showElemOnScroll);
-
-
-
-
-
-

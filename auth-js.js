@@ -1,22 +1,22 @@
 async function checkAuth() {
     try {
-        const response = await fetch('../check_session.php');
+        const response = await fetch('../check-session.php');
         const data = await response.json();
         
-        if (!data.authenticated) {
-            window.location.href = data.redirect;
+        if (!data.isLoggedIn) {
+            window.location.href = '../Login_Register/index.html';  // Solo redirige al login
             return false;
         }
-        
-        // Actualizar elementos de la UI si es necesario
-        updateUIWithUserInfo(data.user);
         return true;
     } catch (error) {
-        console.error('Error checking authentication:', error);
+        console.error('Error:', error);
         window.location.href = '../Login_Register/index.html';
         return false;
     }
 }
+
+// Solo verifica auth
+document.addEventListener('DOMContentLoaded', checkAuth);
 
 function updateUIWithUserInfo(user) {
     // Actualizar elementos de la UI con la información del usuario
