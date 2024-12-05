@@ -5,92 +5,83 @@ const loginForm = document.querySelector('.form-box.login form');
 const registerForm = document.querySelector('.form-box.register form');
 
 // Toggle entre formularios
-registerLink.addEventListener('click', () => {
+registerLink?.addEventListener('click', () => {
     wrapper.classList.add('active');
 });
 
-loginLink.addEventListener('click', () => {
+loginLink?.addEventListener('click', () => {
     wrapper.classList.remove('active');
 });
 
 // Manejar registro
-registerForm.addEventListener('submit', async (e) => {
+registerForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const formData = new FormData(registerForm);
-    formData.append('action', 'register');
     
     try {
-        const response = await fetch('/backend/api.php', {
+        const response = await fetch('../Login_Register/register-handler.php', {
             method: 'POST',
             body: formData
         });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            alert('Registro exitoso. Por favor inicia sesión.');
-            wrapper.classList.remove('active');
+    
+        // Verificar si la respuesta es JSON válido
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('Registro exitoso. Por favor inicia sesión.');
+
+                wrapper.classList.remove('active');
+            } else {
+                alert(result.message || 'Error en el registro');
+
+            }
         } else {
-            alert(result.message);
+            // Si no es JSON, manejar como texto
+            const text = await response.text();
+            console.error('Respuesta no JSON:', text);
+            alert('Error en el registro: Respuesta del servidor inválida');
+          
         }
     } catch (error) {
         console.error('Error:', error);
         alert('Error en el registro');
+
     }
 });
 
 // Manejar login
-loginForm.addEventListener('submit', async (e) => {
+loginForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const formData = new FormData(loginForm);
-    formData.append('action', 'login');
     
     try {
-        const response = await fetch('/backend/api.php', {
+        const response = await fetch('../Login_Register/login-handler.php', {
             method: 'POST',
             body: formData
         });
         
-        const result = await response.json();
-        
-        if (result.success) {
-            alert('Bienvenido ' + result.user.username);
-            window.location.href = '/dashboard.html'; // Redirigir al dashboard
+        // Verificar si la respuesta es JSON válido
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            const result = await response.json();
+            if (result.success) {
+                localStorage.setItem('user', JSON.stringify(result.user));
+                window.location.href = '../Home_Page/index.html'; // Ruta actualizada
+            } else {
+                alert(result.message || 'Error en el inicio de sesión');
+            }
         } else {
-            alert(result.message);
+            // Si no es JSON, manejar como texto
+            const text = await response.text();
+            console.error('Respuesta no JSON:', text);
+            alert('Error en el inicio de sesión: Respuesta del servidor inválida');
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('Error en el inicio de sesión');
-    }
-});
-
-// Manejar "Forgot password"
-const forgotPasswordLink = document.querySelector('.remember-forgot a');
-forgotPasswordLink.addEventListener('click', async (e) => {
-    e.preventDefault();
-    
-    const email = prompt('Ingresa tu email para resetear la contraseña:');
-    if (!email) return;
-    
-    try {
-        const response = await fetch('/backend/api.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                action: 'reset-password',
-                email: email
-            })
-        });
-        
-        const result = await response.json();
-        alert(result.message);
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al procesar la solicitud');
+        console.error('Error de conexión:', error);
+        alert('Error de conexión al servidor');
     }
 });
