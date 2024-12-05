@@ -263,6 +263,108 @@
     </footer>
 
     <!-- Enlace a javaScript-->
+    <script src="script.js"></script>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const titleElement = document.querySelector('.header-main h1');
+        
+        // Hacer el título editable
+        titleElement.contentEditable = true;
+        titleElement.addEventListener('focus', function() {
+            if (this.textContent === '[ Titulo ]') {
+                this.textContent = '';
+            }
+        });
+    
+        titleElement.addEventListener('blur', function() {
+            if (this.textContent.trim() === '') {
+                this.textContent = '[ Titulo ]';
+            }
+        });
+    
+        // Manejo de imágenes
+        const imagePlaceholder = document.querySelector('.image-placeholder');
+        
+        imagePlaceholder.addEventListener('click', function() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const img = document.createElement('img');
+                        img.src = event.target.result;
+                        img.style.maxWidth = '100%';
+                        img.style.maxHeight = '100%';
+                        img.style.borderRadius = '10px';
+                        
+                        imagePlaceholder.innerHTML = '';
+                        imagePlaceholder.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            
+            input.click();
+        });
+    
+        // Modificar el listener del formulario existente
+        const formulario = document.getElementById('formulario');
+        formulario.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const contenido = tinymce.activeEditor.getContent();
+            const titulo = titleElement.textContent === '[ Titulo ]' ? '' : titleElement.textContent;
+            const imagePlaceholder = document.querySelector('.image-placeholder');
+            const imagen = imagePlaceholder.querySelector('img')?.src || null;
+            
+            // Validaciones
+            if (!titulo.trim()) {
+                alert('Por favor, ingrese un título');
+                return;
+            }
+    
+            if (!imagen) {
+                alert('Por favor, seleccione una imagen');
+                return;
+            }
+    
+            try {
+                const response = await fetch('../article-handler.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        titulo: titulo,
+                        contenido: contenido,
+                        imagen: imagen,
+                        categoria: document.querySelector('input[name="categoria"]:checked')?.value || '',
+                        estado: 'publicado'
+                    })
+                });
+    
+                if (!response.ok) throw new Error('Error al publicar');
+    
+                const data = await response.json();
+                if (data.success) {
+                    alert('Artículo publicado exitosamente');
+                    titleElement.textContent = '[ Titulo ]';
+                    imagePlaceholder.innerHTML = 'Inserte Imagen';
+                    tinymce.activeEditor.setContent('');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al publicar el artículo');
+            }
+        });
+    });
+    </script>
     
 </body>
 </html>
