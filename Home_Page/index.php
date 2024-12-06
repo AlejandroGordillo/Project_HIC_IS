@@ -20,44 +20,38 @@
 </head>
 
 <body id="top">
-<?php
-    // Configuración de conexión a la base de datos
-    $host = "localhost";
-    $user = "root"; // Usuario por defecto de XAMPP
-    $password = ""; // Contraseña por defecto de XAMPP (vacía)
-    $database = "prueba_hic"; // Cambiar al nombre de tu base de datos
+    <?php
+        require_once '../db-conexion.php';
 
-    // Crear conexión
-    $conn = new mysqli($host, $user, $password, $database);
+        // Consulta para obtener los últimos 5 registros 
+        $sql = "SELECT id_noticia, text_blog, titulo, categoria, main_image, Fecha_publicacion FROM news ORDER BY id_noticia DESC"; $result = $conn->query($sql); 
+        // Variables para almacenar los datos de los últimos 5 registros 
+        $blogData = []; 
+        if ($result->num_rows > 0) { 
+            while ($row = $result->fetch_assoc()) { 
+                $blogData[] = [ 
+                    'id_noticia' => $row["id_noticia"], 
+                    'text_blog' => $row["text_blog"], 
+                    'titulo' => $row["titulo"], 
+                    'categoria' => $row["categoria"], 
+                    'main_image' => $row["main_image"],
+                    'Fecha_publicacion' => $row["Fecha_publicacion"]
+                ]; 
+            } 
+        } else { 
+            $blogData[] = [ 
+                'id_noticia' => '', 
+                'text_blog' => 'No hay contenido disponible.', 
+                'titulo' => '', 
+                'categoria' => '', 
+                'main_image' => '',
+                'Fecha_publicacion' => '' 
+            ]; 
+        }
 
-    // Verificar conexión
-    if ($conn->connect_error) {
-        die("Conexión fallida: " . $conn->connect_error);
-    }
-
-    // Consulta para obtener el último registro
-    $sql = "SELECT text_blog, titulo, categoria, main_image FROM news ORDER BY id_noticia DESC LIMIT 1";
-    $result = $conn->query($sql);
-
-    // Variables para almacenar los datos del último registro
-    $blogContent = "";
-    $blogTitle = "";
-    $blogCategory = "";
-    $blogMainImage = "";
-
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $blogContent = $row["text_blog"];
-        $blogTitle = $row["titulo"];
-        $blogCategory = $row["categoria"];
-        $blogMainImage = $row["main_image"];
-    } else {
-        $blogContent = "No hay contenido disponible.";
-    }
-
-    // Cerrar conexión
-    $conn->close();
-  ?>
+        // Cerrar conexión
+        $conn->close();
+    ?>
 
     <header class="header">
 
@@ -106,7 +100,7 @@
             </div>
 
             <div class="right-content">
-                <a href="http://localhost/hic_local_host/Login_Register" class="nav-btn">Sign In</a>
+                <a href="http://localhost/hic_test/Login_Register" class="nav-btn">Sign In</a>
 
             </div>
 
@@ -133,10 +127,10 @@
                             <a href="#" class="nav_link-sub">Bolsa de trabajo</a>
                         </li>
                         <li>
-                            <a href="http://localhost/hic_test/Edit_Page/" class="nav_link-sub">Editar</a>
+                            <a href="#" class="nav_link-sub">Telesalud</a>
                         </li>
                     </ul>
-                    <button class="header-top_btn">Donar</Button>
+                    <a href="http://localhost/hic_test/Edit_Page/" class="header-top_btn">Crear Noticia</a>
                 </div>
 
                     <!-- <ul class="header-top_social">
@@ -163,45 +157,15 @@
             <div class="container">
                 <div class="gallery grid">
 
-                    <a href="http://localhost/hic_test/Artc_Page/" class="gallery_item">
+                    <a href="http://localhost/hic_test/Artc_Page?param1=<?php echo htmlspecialchars($blogData[0]['id_noticia']); ?>" class="gallery_item">
                         <div class="img-holder">
-                            <img src="data:image/jpeg;base64,<?php echo base64_encode($blogMainImage); ?>" alt="Imagen de noticia">
-
+                            <img src="data:image/jpeg;base64,<?php echo base64_encode($blogData[0]['main_image']); ?>" alt="Imagen de noticia">
+                            
                             <div class="gallery_content">
-                                <span class="badge secondary"><?php echo htmlspecialchars($blogCategory); ?></span>
-                                <h3 class="gallery_title"><?php echo htmlspecialchars($blogTitle); ?>
+                                <span class="badge secondary"><?php echo htmlspecialchars($blogData[0]['categoria']); ?></span>
+                                <h3 class="gallery_title"><?php echo htmlspecialchars($blogData[0]['titulo']); ?>
 
                                 </h3>
-                                <!-- <p class="gallery_text">
-                                    Con gran dolor les comunicamos la triste noticia del fallecimiento de nuestra querida Dra. Betty Jones, Presidenta Honoraria y Co Fundadora de la Fundación para los Niños de las Californias.
-                                </p> -->
-
-                                <!-- <ul class="gallery-info">
-                                    <li>
-                                        <img src="Resources/user-1.jpg"  alt="" class="img-cover_user">
-                                    </li>
-                                    <li>
-                                        <p>
-                                            By Dr. Robert Bartolo
-                                        </p>
-                                    </li>
-                                    <li>
-                                        <p>
-                                            20 Nov 2023
-                                        </p>
-                                    </li>
-                                </ul> -->
-                            </div>
-                        </div>
-                    </a>
-
-                    <div class="gallery_item">
-                        <div class="img-holder">
-                            <img src="Resources/post-5.jpg" alt="" class="img-cover">
-
-                            <div class="gallery_content">
-                                <span class="badge secondary">Oficial</span>
-                                <h3 class="gallery_title">Taylor Guitars entrega donativo de 2 mil cubrebocas</h3>
 
                                 <ul class="gallery-info">
                                     <li>
@@ -211,21 +175,46 @@
                                     </li>
                                     <li>
                                         <p>
-                                            20 Nov 2023
+                                            <?php echo htmlspecialchars($blogData[0]['Fecha_publicacion']); ?>
+                                        </p>
+                                    </li>
+                                </ul>
+                                
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="http://localhost/hic_test/Artc_Page?param1=<?php echo htmlspecialchars($blogData[1]['id_noticia']); ?>" class="gallery_item">
+                        <div class="img-holder">
+                        <img src="data:image/jpeg;base64,<?php echo base64_encode($blogData[1]['main_image']); ?>" alt="Imagen de noticia">
+
+                            <div class="gallery_content">
+                                <span class="badge secondary"><?php echo htmlspecialchars($blogData[1]['categoria']); ?></span>
+                                <h3 class="gallery_title"><?php echo htmlspecialchars($blogData[1]['titulo']); ?></h3>
+
+                                <ul class="gallery-info">
+                                    <li>
+                                        <p>
+                                            By Dr. Robert Bartolo
+                                        </p>
+                                    </li>
+                                    <li>
+                                        <p>
+                                            <?php echo htmlspecialchars($blogData[1]['Fecha_publicacion']); ?>
                                         </p>
                                     </li>
                                 </ul>
                             </div>
                         </div>
-                    </div>
+                    </a>
 
                     <div class="gallery_item g2">
 
-                        <div class="img-holder">
-                            <img src="Resources/post-21.jpg" alt="" class="img-cover">
+                        <a href="http://localhost/hic_test/Artc_Page?param1=<?php echo htmlspecialchars($blogData[2]['id_noticia']); ?>" class="img-holder">
+                            <img src="data:image/jpeg;base64,<?php echo base64_encode($blogData[2]['main_image']); ?>" alt="Imagen de noticia">
                             <div class="gallery_content">
-                                <span class="badge secondary">Oficial</span> 
-                                <h3 class="gallery_title">Anuncian Expo Peques</h3>
+                                <span class="badge secondary"><?php echo htmlspecialchars($blogData[2]['categoria']); ?></span> 
+                                <h3 class="gallery_title"><?php echo htmlspecialchars($blogData[2]['titulo']); ?></h3>
                                 
                                 <ul class="gallery-info">
                                     <li>
@@ -235,19 +224,19 @@
                                     </li>
                                     <li>
                                         <p>
-                                            20 Nov 2023
+                                            <?php echo htmlspecialchars($blogData[2]['Fecha_publicacion']); ?>
                                         </p>
                                     </li>
                                 </ul>
                             </div>
-                        </div>
+                        </a>
 
-                        <div class="img-holder">
-                            <img src="Resources/post-7.jpg" alt="" class="img-cover">
+                        <a href="http://localhost/hic_test/Artc_Page?param1=<?php echo htmlspecialchars($blogData[3]['id_noticia']); ?>" class="img-holder">
+                            <img src="data:image/jpeg;base64,<?php echo base64_encode($blogData[3]['main_image']); ?>" alt="Imagen de noticia">
 
                             <div class="gallery_content">
-                                <span class="badge secondary">Oficial</span>
-                                <h3 class="gallery_title">Visita de REACH y Baja Health Cluster</h3>
+                                <span class="badge secondary"><?php echo htmlspecialchars($blogData[3]['categoria']); ?></span>
+                                <h3 class="gallery_title"><?php echo htmlspecialchars($blogData[3]['titulo']); ?></h3>
                                 <ul class="gallery-info">
                                     <li>
                                         <p>
@@ -256,95 +245,16 @@
                                     </li>
                                     <li>
                                         <p>
-                                            20 Nov 2023
+                                            <?php echo htmlspecialchars($blogData[3]['Fecha_publicacion']); ?>
                                         </p>
                                     </li>
                                 </ul>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 </div>
             </div>
         </section>
-
-        <!-- <section class="section breaking">
-            <div class="container">
-
-                <div class="b-title">
-                    <span class="breaking_title">Breaking News</span>
-                </div>
-
-                <div class="breaking_container swiper">
-                    <div class="swiper-wrapper">
-                        <div class="swiper-slide breaking_box">
-                            <div class="img-banner">
-                                <img src="Resources/post-9.jpg" alt="">
-                            </div>
-
-                            <div class="breaking_content">
-                                <span class="date">22 Sep 2022</span>
-                                <h2 class="breaking_content-title">Healthy runtime for your healthy lifestyle.</h2>
-                            </div>
-                        </div>
-
-                        <div class="swiper-slide breaking_box">
-                            <div class="img-banner">
-                                <img src="Resources/post-8.jpg" alt="">
-                            </div>
-
-                            <div class="breaking_content">
-                                <span class="date">22 Sep 2022</span>
-                                <h2 class="breaking_content-title">Best tourism site all over the world.</h2>
-                            </div>
-                        </div>
-
-                        <div class="swiper-slide breaking_box">
-                            <div class="img-banner">
-                                <img src="Resources/post-7.jpg" alt="">
-                            </div>
-
-                            <div class="breaking_content">
-                                <span class="date">22 Sep 2022</span>
-                                <h2 class="breaking_content-title">5 Unbelievable secret about choosing right furniture.</h2>
-                            </div>
-                        </div>
-
-                        <div class="swiper-slide breaking_box">
-                            <div class="img-banner">
-                                <img src="Resources/post-9.jpg" alt="">
-                            </div>
-
-                            <div class="breaking_content">
-                                <span class="date">22 Sep 2022</span>
-                                <h2 class="breaking_content-title">Healthy runtime for your healthy lifestyle.</h2>
-                            </div>
-                        </div>
-
-                        <div class="swiper-slide breaking_box">
-                            <div class="img-banner">
-                                <img src="Resources/post-8.jpg" alt="">
-                            </div>
-
-                            <div class="breaking_content">
-                                <span class="date">22 Sep 2022</span>
-                                <h2 class="breaking_content-title">Best tourism site all over the world.</h2>
-                            </div>
-                        </div>
-
-                        <div class="swiper-slide breaking_box">
-                            <div class="img-banner">
-                                <img src="Resources/post-7.jpg" alt="">
-                            </div>
-
-                            <div class="breaking_content">
-                                <span class="date">22 Sep 2022</span>
-                                <h2 class="breaking_content-title">5 Unbelievable secret about choosing right furniture.</h2>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section> -->
 
         <section class="highlight">
             <div class="container">
@@ -352,488 +262,47 @@
 
                 <div class="highlight_container grid">
                     <div class="left_highlights grid">
+                        <?php 
+                        // Dividir las noticias en dos grupos
+                        $halfPoint = ceil(count($blogData));
+                        
+                        // Primera columna
+                        for($i = 4; $i < $halfPoint; $i++): 
+                            $noticia = $blogData[$i];
+                        ?>
+                            <a href="http://localhost/hic_test/Artc_Page?param1=<?php echo htmlspecialchars($noticia['id_noticia']); ?>" class="highlights_item">
+                                <div class="img-holder">
+                                    <img src="data:image/jpeg;base64,<?php echo base64_encode($noticia['main_image']); ?>" alt="img-cover">
+                                    <span class="badge primary"><?php echo htmlspecialchars($noticia['categoria']); ?></span>
+                                </div>
 
-                        <div class="highlights_item">
-                            <div class="img-holder">
-                                <img src="Resources/post-10.jpg" alt="" class="img-cover">
+                                <div class="card_content">
+                                    <h2 class="card_title"><?php echo htmlspecialchars($noticia['titulo']); ?></h2>
 
-                                <span class="badge primary">Pediatría</span>
-                            </div>
+                                    <ul class="card-info">
+                                        <li>
+                                            <img src="Resources/user-1.jpg" alt="" class="img-cover_user">
+                                        </li>
+                                        <li>
+                                            <p>By Dr. Adain</p>
+                                        </li>
+                                        <li>
+                                            <p><?php echo htmlspecialchars($noticia['Fecha_publicacion']); ?></p>
+                                        </li>
+                                    </ul>
 
-                            <div class="card_content">
-                                <h2 class="card_title">Alimentacion en la diabetes</h2>
-
-                                <ul class="card-info">
-                                    <li>
-                                        <img src="Resources/user-1.jpg" alt="" class="img-cover_user">
-                                    </li>
-                                    <li>
-                                        <p>
-                                            By Dr. Adain
-                                        </p>
-                                    </li>
-                                    <li>
-                                        <p>
-                                            25 Sep 2023
-                                        </p>
-                                    </li>
-                                </ul>
-
-                                <p class="card_text">
-                                    Departamento de Nutrición del Hospital Infantil de las Californias. En caso de presentar síntomas de diabetes o tener factores de riesgo es necesario realizar estudios como: Glucosa plasmática en ayunas. 
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="highlights_item">
-                            <div class="img-holder">
-                                <img src="Resources/post-11.jpg" alt="">
-
-                                <span class="badge primary">Nutricion</span>
-                            </div>
-
-                            <div class="card_content">
-                                <h2 class="card_title">Consejos nutricionales para florecer esta primavera</h2>
-
-                                <ul class="card-info">
-                                    <li>
-                                        <img src="Resources/user-1.jpg" alt="" class="img-cover_user">
-                                    </li>
-                                    <li>
-                                        <p>
-                                            By Dr. Adain
-                                        </p>
-                                    </li>
-                                    <li>
-                                        <p>
-                                            25 Sep 2023
-                                        </p>
-                                    </li>
-                                </ul>
-
-                                <p class="card_text">
-                                    Incluye alimentos reales y naturales: Nos referimos a alimentos reales cuando hablamos de ingredientes naturales, principalmente frutas y verduras, legumbres, carnes magras, frutos secos, semillas y cereales lo más enteras posible.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="highlights_item">
-                            <div class="img-holder">
-                                <img src="Resources/post-12.jpg" alt="">
-
-                                <span class="badge primary">Terapia Fisica</span>
-                            </div>
-
-                            <div class="card_content">
-                                <h2 class="card_title">Retraso Psicomotor</h2>
-
-                                <ul class="card-info">
-                                    <li>
-                                        <img src="Resources/user-1.jpg" alt="" class="img-cover_user">
-                                    </li>
-                                    <li>
-                                        <p>
-                                            By Dr. Adain
-                                        </p>
-                                    </li>
-                                    <li>
-                                        <p>
-                                            25 Sep 2023
-                                        </p>
-                                    </li>
-                                </ul>
-
-                                <p class="card_text">
-                                    El retraso psicomotor implica un retardo en el desarrollo de las destrezas cognitivas y motoras del bebe, los hitos del desarrollo que requieren durante determinada edad no aparecen o lo están haciendo de forma anómala.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="highlights_item">
-                            <div class="img-holder">
-                                <img src="Resources/post-13.jpg" alt="">
-
-                                <span class="badge primary">Oficial</span>
-                            </div>
-
-                            <div class="card_content">
-                                <h2 class="card_title">Firma de convenio con Fronteras Unidas Pro Salud</h2>
-
-                                <ul class="card-info">
-                                    <li>
-                                        <img src="Resources/user-1.jpg" alt="" class="img-cover_user">
-                                    </li>
-                                    <li>
-                                        <p>
-                                            By Dr. Adain
-                                        </p>
-                                    </li>
-                                    <li>
-                                        <p>
-                                            25 Sep 2023
-                                        </p>
-                                    </li>
-                                </ul>
-
-                                <p class="card_text">
-                                    El Hospital Infantil de las Californias (HIC) y Fronteras Unidas Pro Salud A.C. firmaron la renovación del Convenio de Colaboración que tienen desde hace más de 20 años al apoyarse mutuamente cuando ambas organizaciones iniciaron con su labor. 
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="highlights_item">
-                            <div class="img-holder">
-                                <img src="Resources/post-14.jpg" alt="" class="img-cover">
-
-                                <span class="badge primary">Oficial</span>
-                            </div>
-
-                            <div class="card_content">
-                                <h2 class="card_title">Feria de salud “Prevenir es Vivir”.</h2>
-
-                                <ul class="card-info">
-                                    <li>
-                                        <img src="Resources/user-1.jpg" alt="" class="img-cover_user">
-                                    </li>
-                                    <li>
-                                        <p>
-                                            By Dr. Adain
-                                        </p>
-                                    </li>
-                                    <li>
-                                        <p>
-                                            25 Sep 2023
-                                        </p>
-                                    </li>
-                                </ul>
-
-                                <p class="card_text">
-                                    Nuestra Institución fue invitada a participar en la 5ta. feria de la salud “Prevenir es Vivir” que organiza Tijuana Agradecida A.C., organismo conformado por empresarios que impulsan el fortalecimiento de la seguridad pública en la ciudad.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="highlights_item">
-                            <div class="img-holder">
-                                <img src="Resources/post-15.jpg" alt="">
-
-                                <span class="badge primary">Nutricion</span>
-                            </div>
-
-                            <div class="card_content">
-                                <h2 class="card_title">Jornada de Nutrición</h2>
-
-                                <ul class="card-info">
-                                    <li>
-                                        <img src="Resources/user-1.jpg" alt="" class="img-cover_user">
-                                    </li>
-                                    <li>
-                                        <p>
-                                            By  Dr. Adain
-                                        </p>
-                                    </li>
-                                    <li>
-                                        <p>
-                                            25 Sep 2023
-                                        </p>
-                                    </li>
-                                </ul>
-
-                                <p class="card_text">
-                                    Se llevó a cabo la 6ta edición de la Jornada de Nutrición Pediátrica: “Panorama Global de Alergias e Intolerancias Alimentarias” el 07 de junio de 2019.
-                                </p>
-                            </div>
-                        </div>
-
+                                </div>
+                            </a>
+                        <?php endfor; ?>
                     </div>
 
-                    <div class="right_highlights grid">
-                        <div class="trending">
-                            <h3 class="section_subtitle has-before has-after">Filtro</h3>
-                            <div class="trending_list grid">
-    
-                                <div class="trending_item">
-                                    <div class="trending_wrapper">
-                                        <i class='bx bx-chevron-right'></i>
-        
-                                        <span class="trending_name">Oficial</span>
-                                    </div>
-        
-                                    <span class="trending_count">(05)</span>
-                                </div>
-        
-                                <div class="trending_item">
-                                    <div class="trending_wrapper">
-                                        <i class='bx bx-chevron-right'></i>
-        
-                                        <span class="trending_name">Pediatria</span>
-                                    </div>
-        
-                                    <span class="trending_count">(07)</span>
-                                </div>
-        
-                                <div class="trending_item">
-                                    <div class="trending_wrapper">
-                                        <i class='bx bx-chevron-right'></i>
-        
-                                        <span class="trending_name">Nutricion</span>
-                                    </div>
-        
-                                    <span class="trending_count">(03)</span>
-                                </div>
-        
-                                <div class="trending_item">
-                                    <div class="trending_wrapper">
-                                        <i class='bx bx-chevron-right'></i>
-        
-                                        <span class="trending_name">Oftalmologia</span>
-                                    </div>
-        
-                                    <span class="trending_count">(06)</span>
-                                </div>
-        
-                                <div class="trending_item">
-                                    <div class="trending_wrapper">
-                                        <i class='bx bx-chevron-right'></i>
-        
-                                        <span class="trending_name">Dermatologia</span>
-                                    </div>
-        
-                                    <span class="trending_count">(12)</span>
-                                </div>
-        
-                                <div class="trending_item">
-                                    <div class="trending_wrapper">
-                                        <i class='bx bx-chevron-right'></i>
-        
-                                        <span class="trending_name">Neumologia</span>
-                                    </div>
-        
-                                    <span class="trending_count">(08)</span>
-                                </div>
-        
-                            </div>
-                        </div>
-
-                        <!-- <div class="popular_post">
-                            <h3 class="section_subtitle has-before has-after">Popular Post</h3>
-
-                            <div class="popular_post-list grid">
-
-                                <div class="popular_post-item">
-                                    <div class="popular-banner">
-                                        <img src="Resources/post-20.jpg" alt="">
-                                    </div>
-
-                                    <div class="popular-content">
-                                        <span class="date">19 Jun 2022</span>
-
-                                        <h3 class="popular-title">Perfect Photo Clicking Idea You Must Know.</h3>
-                                    </div>
-                                </div>
-
-                                <div class="popular_post-item">
-                                    <div class="popular-banner">
-                                        <img src="Resources/post-19.jpg" alt="">
-                                    </div>
-
-                                    <div class="popular-content">
-                                        <span class="date">19 Jun 2022</span>
-
-                                        <h3 class="popular-title">Perfect Photo Clicking Idea You Must Know.</h3>
-                                    </div>
-                                </div>
-
-                                <div class="popular_post-item">
-                                    <div class="popular-banner">
-                                        <img src="Resources/post-18.jpg" alt="">
-                                    </div>
-
-                                    <div class="popular-content">
-                                        <span class="date">19 Jun 2022</span>
-
-                                        <h3 class="popular-title">Perfect Photo Clicking Idea You Must Know.</h3>
-                                    </div>
-                                </div>
-
-                                <div class="popular_post-item">
-                                    <div class="popular-banner">
-                                        <img src="Resources/post-17.jpg" alt="">
-                                    </div>
-
-                                    <div class="popular-content">
-                                        <span class="date">19 Jun 2022</span>
-
-                                        <h3 class="popular-title">Perfect Photo Clicking Idea You Must Know.</h3>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
-
-                        <!-- <div class="brand">
-                            <img src="Resources/post-21.png" alt="" >
-                        </div> -->
-                    </div>
-
-                    <div class="box">
-                        <button type="button" class="prev"><a href="#">Prev</a></button>
-
-                        <ul class="ul">
-                            <!-- <li><a href="#" class="page_number">1</a></li>
-                            <li><a href="#" class="page_number">2</a></li>
-                            <li><a href="#" class="page_number">3</a></li>
-                            <li><a href="#" class="page_number">4</a></li>
-                            <li><a href="#" class="page_number">5</a></li> -->
-                        </ul>
-
-                        <button type="button" class="next"><a href="#">Next</a></button>
-                    </div>
+                    
                 </div>
-
             </div>
         </section>
 
-        <!-- <section class="section sponsor">
-            <div class="container">
-                <h2 class="section_title has-before has-after">Sponsored News</h2>
-
-                <ul class="sponsor_list grid">
-
-                    <li class="sponsor_item">
-                        <div class="img-holder">
-                            <img src="Resources/post-11.jpg" alt="" class="img-banner">
-
-                            <span class="badge primary">Travel</span>
-                        </div>
-
-                        <div class="card_content">
-                            <h2 class="card_title">Top Most Beautiful Scenery in The World</h2>
-
-                            <ul class="card-info">
-                                <li>
-                                    <img src="Resources/user-1.jpg" alt="" class="img-cover_user">
-                                </li>
-                                
-                                <li>
-                                    <p>
-                                        By Admin
-                                    </p>
-                                </li>
-                                <li>
-                                    <p>
-                                        26 Sep 2022
-                                    </p>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <li class="sponsor_item">
-                        <div class="img-holder">
-                            <img src="Resources/post-10.jpg" alt="">
-
-                            <span class="badge primary">Travel</span>
-                        </div>
-
-                        <div class="card_content">
-                            <h2 class="card_title">Top Most Beautiful Scenery in The World</h2>
-
-                            <ul class="card-info">
-                                <li>
-                                    <img src="Resources/user-1.jpg" alt="" class="img-cover_user">
-                                </li>
-                                
-                                <li>
-                                    <p>
-                                        By Admin
-                                    </p>
-                                </li>
-                                <li>
-                                    <p>
-                                        26 Sep 2022
-                                    </p>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <li class="sponsor_item">
-                        <div class="img-holder">
-                            <img src="Resources/post-8.jpg" alt="">
-
-                            <span class="badge primary">Travel</span>
-                        </div>
-
-                        <div class="card_content">
-                            <h2 class="card_title">Top Most Beautiful Scenery in The World</h2>
-
-                            <ul class="card-info">
-                                <li>
-                                    <img src="Resources/user-1.jpg" alt="" class="img-cover_user">
-                                </li>
-                                
-                                <li>
-                                    <p>
-                                        By Admin
-                                    </p>
-                                </li>
-                                <li>
-                                    <p>
-                                        26 Sep 2022
-                                    </p>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <li class="sponsor_item">
-                        <div class="img-holder">
-                            <img src="Resources/post-9.jpg" alt="">
-
-                            <span class="badge primary">Travel</span>
-                        </div>
-
-                        <div class="card_content">
-                            <h2 class="card_title">Top Most Beautiful Scenery in The World</h2>
-
-                            <ul class="card-info">
-                                <li>
-                                    <img src="Resources/user-1.jpg" alt="" class="img-cover_user">
-                                </li>
-                                
-                                <li>
-                                    <p>
-                                        By Admin
-                                    </p>
-                                </li>
-                                <li>
-                                    <p>
-                                        26 Sep 2022
-                                    </p>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </section> -->
-
         <section class="section newsletter">
             <div class="container">
-                <!-- <div class="news_content">
-                    <h2 class="news_title">Never miss any Update</h2>
-                    <p class="news_text">
-                        Get the freshest headlines and updates sent uninterrupted to your inbox.
-                    </p>
-
-                    <form action="" class="news_form">
-                        <input type="email" placeholder="Enter your email" class="new_field">
-                        <a href="#" class="form_btn">
-                            <span class="span">Subscribe</span>
-                            <i class='bx bx-user' ></i>
-                        </a>
-                    </form>
-                </div> -->
             </div>
         </section>
     </main>

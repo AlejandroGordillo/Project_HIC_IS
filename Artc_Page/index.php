@@ -31,22 +31,12 @@
 
   <body>
     <?php
-    // Configuración de conexión a la base de datos
-    $host = "localhost";
-    $user = "root"; // Usuario por defecto de XAMPP
-    $password = ""; // Contraseña por defecto de XAMPP (vacía)
-    $database = "prueba_hic"; // Cambiar al nombre de tu base de datos
+    require_once '../db-conexion.php';
 
-    // Crear conexión
-    $conn = new mysqli($host, $user, $password, $database);
-
-    // Verificar conexión
-    if ($conn->connect_error) {
-        die("Conexión fallida: " . $conn->connect_error);
-    }
+    $id = $_GET['param1'];
 
     // Consulta para obtener el último registro
-    $sql = "SELECT text_blog, titulo, categoria, main_image FROM news ORDER BY id_noticia DESC LIMIT 1";
+    $sql = "SELECT text_blog, titulo, categoria, main_image FROM news WHERE id_noticia=$id";
     $result = $conn->query($sql);
 
     // Variables para almacenar los datos del último registro

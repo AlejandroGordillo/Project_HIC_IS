@@ -1,31 +1,3 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const response = await fetch('../check-session.php');
-        const data = await response.json();
-        const signInBtn = document.querySelector('.nav-btn');
-        
-        if (!data.isLoggedIn) {
-            window.location.href = '../Login_Register/index.html';
-            return;
-        }
-
-        if (data.isLoggedIn) {
-            signInBtn.textContent = `${data.user.username}`;
-            signInBtn.href = '#';
-            
-            signInBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                if (confirm('¿Desea cerrar sesión?')) {
-                    await fetch('../logout.php');
-                    window.location.href = '../Login_Register/index.html?logout=true';
-                }
-            });
-        }
-    } catch (error) {
-        console.error('Error checking session:', error);
-        window.location.href = '../Login_Register/index.html';
-    }
-});
 
 tinymce.init({
     selector: '#editor',
