@@ -4,83 +4,88 @@ const registerLink = document.querySelector('.register-link');
 const loginForm = document.querySelector('.form-box.login form');
 const registerForm = document.querySelector('.form-box.register form');
 
-document.addEventListener('DOMContentLoaded', async () => {
-    if (window.location.search.includes('logout=true')) {
-        return;
-    }
-
-    try {
-        const response = await fetch('../check-session.php');
-        const data = await response.json();
-        
-        if (data.isLoggedIn) {
-            window.location.href = '../Home_Page/index.html';
-        }
-    } catch (error) {
-        console.error('Error checking session:', error);
-    }
-});
-
-registerLink?.addEventListener('click', () => {
+// Toggle entre formularios
+registerLink.addEventListener('click', () => {
     wrapper.classList.add('active');
 });
 
-loginLink?.addEventListener('click', () => {
+loginLink.addEventListener('click', () => {
     wrapper.classList.remove('active');
 });
 
-registerForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData(registerForm);
-    
-    try {
-        const response = await fetch('../Login_Register/register-handler.php', {
-            method: 'POST',
-            body: formData
-        });
-    
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.indexOf("application/json") !== -1) {
-            const result = await response.json();
-            
-            if (result.success) {
-                alert('Registro exitoso. Por favor inicia sesión.');
-                wrapper.classList.remove('active');
-            } else {
-                alert(result.message || 'Error en el registro');
-            }
-        } else {
-            const text = await response.text();
-            console.error('Respuesta no JSON:', text);
-            alert('Error en el registro: Respuesta del servidor inválida');
-        }
-    } catch (error) {
+// Manejar registro
+document.getElementById('registroForm').addEventListener('submit', function(event){
+    event.preventDefault();
+
+    const formData = new FormData(this);
+    fetch('register.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log(data);
+        alert('Registro Exitoso');
+    })
+    .catch(error => {
         console.error('Error:', error);
         alert('Error en el registro');
-    }
+    });
+    window.location.href = "http://localhost/hic_local_host/Home_Page"
+        
 });
 
-loginForm?.addEventListener('submit', async (e) => {
+// Manejar login
+loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const formData = new FormData(loginForm);
+    formData.append('action', 'login');
     
     try {
-        const response = await fetch('login-handler.php', {
+        const response = await fetch('/backend/api.php', {
             method: 'POST',
             body: formData
         });
         
         const result = await response.json();
+        
         if (result.success) {
-            localStorage.setItem('user', JSON.stringify(result.user));
-            window.location.href = '../Home_Page/index.html';
+            alert('Bienvenido ' + result.user.username);
+            window.location.href = '/dashboard.html'; // Redirigir al dashboard
         } else {
-            alert(result.message || 'Error en el inicio de sesión');
+            alert(result.message);
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error de conexión al servidor');
+        alert('Error en el inicio de sesión');
+    }
+});
+
+// Manejar "Forgot password"
+const forgotPasswordLink = document.querySelector('.remember-forgot a');
+forgotPasswordLink.addEventListener('click', async (e) => {
+    e.preventDefault();
+    
+    const email = prompt('Ingresa tu email para resetear la contraseña:');
+    if (!email) return;
+    
+    try {
+        const response = await fetch('/backend/api.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: 'reset-password',
+                email: email
+            })
+        });
+        
+        const result = await response.json();
+        alert(result.message);
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al procesar la solicitud');
     }
 });
